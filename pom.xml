@@ -39,6 +39,22 @@
         <tag>HEAD</tag>
     </scm>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>libthrift.wso2</groupId>
+                <artifactId>libthrift</artifactId>
+                <version>${libthrift.wso2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.opensaml</groupId>
+                <artifactId>opensaml</artifactId>
+                <version>${opensaml2.wso2.version}</version>
+            </dependency>
+        </dependencies>
+
+    </dependencyManagement>
+
     <repositories>
         <repository>
             <id>wso2-nexus</id>
@@ -117,6 +133,16 @@
         <module>components/org.wso2.carbon.identity.entitlement.filter</module>
         <module>features/org.wso2.carbon.identity.xacml.filter.feature</module>
     </modules>
+
+    <properties>
+        <libthrift.wso2.version>0.8.0.wso2v1</libthrift.wso2.version>
+        <!--Change major version to minor version which is 0.9.0 due to 0.8.x and 0.9.x incompatibility-->
+        <libthrift.wso2.osgi.version.range>[0.8.0.wso2v1,0.9.0)</libthrift.wso2.osgi.version.range>
+
+        <opensaml.version>2.6.4</opensaml.version>
+        <opensaml2.wso2.version>2.6.4.wso2v2</opensaml2.wso2.version>
+        <opensaml2.wso2.osgi.version.range>[2.6.0,3.0.0)</opensaml2.wso2.osgi.version.range>
+    </properties>
 
 </project>
 
