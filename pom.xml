@@ -26,7 +26,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>identity-agent-entitlement-filter</artifactId>
-    <version>5.0.9-SNAPSHOT</version>
+    <version>5.1.0</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Identity Entitlement Filter Module</name>
     <description>
@@ -37,7 +37,7 @@
         <url>https://github.com/wso2-extensions/identity-agent-entitlement-filter.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/identity-agent-entitlement-filter.git</developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/identity-agent-entitlement-filter.git</connection>
-        <tag>HEAD</tag>
+        <tag>v5.1.0</tag>
     </scm>
 
     <dependencyManagement>
