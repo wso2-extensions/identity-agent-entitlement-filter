@@ -110,11 +110,11 @@
                             org.wso2.carbon.authenticator.stub.*;
                             version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.identity.entitlement.proxy.*;
-                            version="${carbon.identity.package.import.version.range}",
+                            version="${identity.agent.entitlement.proxy.package.import.version.range}",
                         </Import-Package>
                         <Export-Package>
                             org.wso2.carbon.identity.entitlement.filter.*;
-                            version="${carbon.identity.package.export.version}"
+                            version="${identity.agent.entitlement.filter.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>
