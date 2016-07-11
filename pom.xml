@@ -19,11 +19,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.identity</groupId>
-        <artifactId>identity-extension-parent</artifactId>
-        <version>5.1.0</version>
+        <groupId>org.wso2</groupId>
+        <artifactId>wso2</artifactId>
+        <version>1</version>
     </parent>
 
+    <groupId>org.wso2.carbon.identity</groupId>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>identity-agent-entitlement-filter</artifactId>
     <version>5.1.1-SNAPSHOT</version>
@@ -43,6 +44,31 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.identity.entitlement.proxy</artifactId>
+                <version>${identity.agent.entitlement.proxy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.identity.entitlement.filter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.utils</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.authenticator.stub</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>libthrift.wso2</groupId>
                 <artifactId>libthrift</artifactId>
                 <version>${libthrift.wso2.version}</version>
@@ -58,19 +84,9 @@
                 <version>${joda.wso2.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.entitlement.proxy</artifactId>
-                <version>${entitlement.proxy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
-                <version>${identity.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.entitlement.filter</artifactId>
-                <version>${project.version}</version>
+                <groupId>org.eclipse.equinox</groupId>
+                <artifactId>javax.servlet</artifactId>
+                <version>${version.javax.servlet}</version>
             </dependency>
         </dependencies>
 
@@ -150,12 +166,119 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-scr-plugin</artifactId>
+                    <version>${maven.scr.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>generate-scr-scrdescriptor</id>
+                            <goals>
+                                <goal>scr</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>${maven.bundle.plugin.version}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <obrRepository>NONE</obrRepository>
+                        <instructions>
+                            <SCM-Revision>${buildNumber}</SCM-Revision>
+                        </instructions>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <version>${maven.buildnumber.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>create</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <doCheck>false</doCheck>
+                        <doUpdate>false</doUpdate>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <preparationGoals>clean install</preparationGoals>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.1</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
     <modules>
         <module>components/org.wso2.carbon.identity.entitlement.filter</module>
         <module>features/org.wso2.carbon.identity.xacml.filter.feature</module>
     </modules>
 
     <properties>
+        <!--Carbon Identity Framework Version-->
+        <carbon.identity.framework.version>5.2.0</carbon.identity.framework.version>
+
+        <identity.agent.entitlement.proxy.version>5.1.1</identity.agent.entitlement.proxy.version>
+        <identity.agent.entitlement.proxy.import.version.range>[5.0.0, 6.0.0)</identity.agent.entitlement.proxy.import.version.range>
+        <identity.agent.entitlement.filter.export.version>${project.version}</identity.agent.entitlement.filter.export.version>
+
+        <!--Carbon Kernel Version-->
+        <carbon.kernel.version>4.4.7</carbon.kernel.version>
+        <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
+
+        <!-- Axiom Version -->
+        <axiom.osgi.version.range>[1.2.11, 2.0.0)</axiom.osgi.version.range>
+
+        <!-- Axis2 Version -->
+        <axis2.osgi.version.range>[1.6.1.wso2v12, 2.0.0)</axis2.osgi.version.range>
+
+        <!-- Commons -->
+        <commons-codec.wso2.osgi.version.range>[1.4.0,2.0.0)</commons-codec.wso2.osgi.version.range>
+        <commons-logging.osgi.version.range>[1.2,2.0)</commons-logging.osgi.version.range>
+
+
+        <!--Maven Plugin Version-->
+        <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
+        <maven.compiler.plugin.version>2.3.1</maven.compiler.plugin.version>
+        <maven.scr.plugin.version>1.7.2</maven.scr.plugin.version>
+        <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
+        <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
+
+        <version.javax.servlet>3.0.0.v201112011016</version.javax.servlet>
         <libthrift.wso2.version>0.8.0.wso2v1</libthrift.wso2.version>
         <!--Change major version to minor version which is 0.9.0 due to 0.8.x and 0.9.x incompatibility-->
         <libthrift.wso2.osgi.version.range>[0.8.0.wso2v1,0.9.0)</libthrift.wso2.osgi.version.range>
@@ -166,8 +289,6 @@
         <joda.version>2.8.2</joda.version>
         <joda.wso2.version>2.8.2.wso2v1</joda.wso2.version>
         <joda.wso2.osgi.version.range>[2.8.2,3.0.0)</joda.wso2.osgi.version.range>
-
-        <entitlement.proxy.version>5.1.0</entitlement.proxy.version>
     </properties>
 
 </project>
