@@ -19,7 +19,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.identity</groupId>
+        <groupId>org.wso2.carbon.identity.agent.entitlement.filter</groupId>
         <artifactId>identity-agent-entitlement-filter</artifactId>
         <relativePath>../../pom.xml</relativePath>
         <version>5.1.2-SNAPSHOT</version>
@@ -34,15 +34,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
+            <groupId>org.wso2.carbon.identity.agent.entitlement.filter</groupId>
             <artifactId>org.wso2.carbon.identity.entitlement.filter</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
+            <groupId>org.wso2.carbon.identity.agent.entitlement.mediator</groupId>
             <artifactId>org.wso2.carbon.identity.entitlement.proxy</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
         </dependency>
         <dependency>
@@ -86,11 +86,11 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>libthrift.wso2:libthrift</bundleDef>
-                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.entitlement.proxy
+                                <bundleDef>org.wso2.carbon.identity.agent.entitlement.mediator:org.wso2.carbon.identity.entitlement.proxy
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.entitlement.filter
+                                <bundleDef>org.wso2.carbon.identity.agent.entitlement.filter:org.wso2.carbon.identity.entitlement.filter
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.entitlement.stub
+                                <bundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.identity.entitlement.stub
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.authenticator.stub</bundleDef>
                                 <bundleDef>org.wso2.orbit.org.opensaml:opensaml</bundleDef>
