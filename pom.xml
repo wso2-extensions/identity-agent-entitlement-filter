@@ -263,7 +263,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven-surefire-plugin}</version>
+                    <version>${maven.surefire.plugin.version}</version>
                     <configuration>
                         <argLine>${argLine}</argLine>
                     </configuration>
@@ -333,7 +333,7 @@
         <maven.scr.plugin.version>1.7.2</maven.scr.plugin.version>
         <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
-        <maven-surefire-plugin-version>2.21.0</maven-surefire-plugin-version>
+        <maven.surefire.plugin.version>2.21.0</maven.surefire.plugin.version>
 
         <version.javax.servlet>3.0.0.v201112011016</version.javax.servlet>
         <libthrift.wso2.version>0.8.0.wso2v1</libthrift.wso2.version>
