@@ -290,7 +290,7 @@
         <wso2.synapse.version>2.1.1-wso2v1</wso2.synapse.version>
         
         <joda.version>2.8.2</joda.version>
-        <joda.wso2.version>2.8.2.wso2v1</joda.wso2.version>
+        <joda.wso2.version>2.9.4.wso2v1</joda.wso2.version>
         <joda.wso2.osgi.version.range>[2.8.2,3.0.0)</joda.wso2.osgi.version.range>
     </properties>
 
