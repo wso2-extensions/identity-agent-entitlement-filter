@@ -71,6 +71,8 @@ public class EntitlementConstants {
     public static final String INDETERMINATE = "Indeterminate";
 
     public static final String REQUEST_PARAM = "request-param";
+    
+    public static final String SAML = "saml";
 
     public static final String REQUEST_ATTIBUTE = "request-attribute";
 

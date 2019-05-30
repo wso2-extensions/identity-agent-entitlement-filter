@@ -127,6 +127,27 @@
             <param-name>thriftPort</param-name>
             <param-value>10500</param-value>
         </init-param>
+
+        <!-- Custom attribute list used for XACML -->
+        <init-param>
+            <param-name>customAttributeList</param-name>
+            <param-value>http://wso2.org/claims/identity/federationID1,http://wso2.org/claims/identity/EmployeePositionName1,http://wso2.org/claims/identity/EmployerName1</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>http://wso2.org/claims/identity/federationID</param-name>
+            <param-value>http://wso2.org/claims/identity</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>http://wso2.org/claims/identity/EmployeePositionName</param-name>
+            <param-value>http://wso2.org/claims/identity</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>http://wso2.org/claims/identity/EmployerName</param-name>
+            <param-value>http://wso2.org/claims/identity</param-value>
+        </init-param>
     </filter>
 
     <!-- Filter mappings used to configure URLs that need to be authorized  -->

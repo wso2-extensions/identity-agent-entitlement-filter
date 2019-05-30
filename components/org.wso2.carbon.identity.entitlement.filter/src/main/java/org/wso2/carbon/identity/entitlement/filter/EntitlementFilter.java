@@ -26,8 +26,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.entitlement.filter.callback.BasicAuthCallBackHandler;
 import org.wso2.carbon.identity.entitlement.filter.callback.EntitlementFilterCallBackHandler;
+import org.wso2.carbon.identity.entitlement.filter.callback.SAMLAuthCallBackHandler;
 import org.wso2.carbon.identity.entitlement.filter.exception.EntitlementFilterException;
 import org.wso2.carbon.identity.entitlement.proxy.PEPProxy;
+import org.wso2.carbon.identity.entitlement.proxy.Attribute;
 import org.wso2.carbon.identity.entitlement.proxy.PEPProxyConfig;
 import org.wso2.carbon.identity.entitlement.proxy.exception.EntitlementProxyException;
 
@@ -38,8 +40,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
+
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 
 public class EntitlementFilter implements Filter {
@@ -60,6 +65,9 @@ public class EntitlementFilter implements Filter {
     private String subjectScope;
     private String subjectAttributeName;
     private String authRedirectURL;
+    private String[] attributeNameList;
+    private boolean hasCustom; // Service uses custom attributes.
+    private Map<String, String> attributeList;
 
     /**
      * In this init method the required attributes are taken from web.xml, if there are not provided they will be set to default.
@@ -114,6 +122,18 @@ public class EntitlementFilter implements Filter {
         } else {
             thriftPort = EntitlementConstants.defaultThriftPort;
         }
+        
+        if (filterConfig.getInitParameter("customAttributeList") != null) {
+        	hasCustom = true;
+	        attributeNameList = filterConfig.getInitParameter("customAttributeList").split(",");
+	        attributeList = new HashMap<String, String>();
+	        for (String attribute : attributeNameList)
+	        	if(filterConfig.getInitParameter(attribute) != null)
+		        	attributeList.put(attribute, 
+		        			filterConfig.getInitParameter(attribute));
+        } else  {
+        	hasCustom = false;
+        }
 
 
 
@@ -133,7 +153,7 @@ public class EntitlementFilter implements Filter {
                 clientConfigMap.put(EntitlementConstants.SERVER_URL, remoteServiceUrl);
                 clientConfigMap.put(EntitlementConstants.USERNAME, remoteServiceUserName);
                 clientConfigMap.put(EntitlementConstants.PASSWORD, remoteServicePassword);
-            }else if (client.equals(EntitlementConstants.THRIFT)) {
+            } else if (client.equals(EntitlementConstants.THRIFT)) {
                 clientConfigMap.put(EntitlementConstants.CLIENT, client);
                 clientConfigMap.put(EntitlementConstants.SERVER_URL, remoteServiceUrl);
                 clientConfigMap.put(EntitlementConstants.USERNAME, remoteServiceUserName);
@@ -141,11 +161,11 @@ public class EntitlementFilter implements Filter {
                 clientConfigMap.put(EntitlementConstants.REUSE_SESSION, reuseSession);
                 clientConfigMap.put(EntitlementConstants.THRIFT_HOST, thriftHost);
                 clientConfigMap.put(EntitlementConstants.THRIFT_PORT, thriftPort);
-            }else {
+            } else {
                 throw new EntitlementFilterException("EntitlementMediator initialization error: Unsupported client");
             }
 
-        }else {
+        } else {
             clientConfigMap.put(EntitlementConstants.SERVER_URL, remoteServiceUrl);
             clientConfigMap.put(EntitlementConstants.USERNAME, remoteServiceUserName);
             clientConfigMap.put(EntitlementConstants.PASSWORD, remoteServicePassword);
@@ -169,9 +189,13 @@ public class EntitlementFilter implements Filter {
         String userName;
         String action;
         String resource;
+        Attribute[] attributes = null;
         String env = "";
 
         userName = findUserName((HttpServletRequest) servletRequest, subjectScope, subjectAttributeName);
+        if (hasCustom)
+        	attributes = findCustomAttributes((HttpServletRequest) servletRequest, subjectScope);
+
         resource = findResource((HttpServletRequest) servletRequest);
         action = findAction((HttpServletRequest) servletRequest);
 
@@ -184,16 +208,21 @@ public class EntitlementFilter implements Filter {
 
         } else {
             try {
-                String decision = pepProxy.getDecision(userName, resource, action, env);
-                OMElement decisionElement = AXIOMUtil.stringToOM(decision);
-                String namespace = "";
-                if (decisionElement.getNamespace().getNamespaceURI() != null) {
-                    namespace = decisionElement.getNamespace().getNamespaceURI();
-                }
-                simpleDecision = decisionElement.getFirstChildWithName(new QName(namespace, "Result")).
-                        getFirstChildWithName(new QName(namespace, "Decision")).getText();
-            } catch (Exception e) {
+            	String decision = EntitlementConstants.DENY;
+            	if (hasCustom()) {
+            		decision = pepProxy.getDecision(userName, attributes, resource, action, env);
+            	} else {
+            		decision = pepProxy.getDecision(userName, resource, action, env);
+            	}
 
+                OMElement decisionElement = AXIOMUtil.stringToOM(decision);
+                //cprice - modified to prevent errors when reading response. 
+                // Apparently the wso2 code was not compatible with IS 5.5
+                simpleDecision = decisionElement
+                		.getFirstChildWithName(new QName("urn:oasis:names:tc:xacml:3.0:core:schema:wd-17","Result"))
+                		.getFirstChildWithName(new QName("urn:oasis:names:tc:xacml:3.0:core:schema:wd-17","Decision"))
+                		.getText();
+            } catch (Exception e) {
                 throw new EntitlementFilterException("Exception while making the decision " , e);
             }
         }
@@ -217,7 +246,38 @@ public class EntitlementFilter implements Filter {
         subjectScope = null;
         subjectAttributeName = null;
         authRedirectURL = null;
+        attributeNameList = null;
+        attributeList = null;
     }
+    
+    public boolean hasCustom() {
+    	return hasCustom;
+    }
+	
+	private Attribute[] findCustomAttributes(HttpServletRequest request, String subjectScope)
+			throws EntitlementFilterException {
+		Attribute[] attributes = null;
+		if (subjectScope.equals(EntitlementConstants.SAML)) {
+			// get the SAML session, etc.
+			EntitlementFilterCallBackHandler callBackHandler = new SAMLAuthCallBackHandler(request, attributeList);
+			attributes = callBackHandler.getAttributes();
+		} else {
+			log.error(subjectScope + " is an invalid"
+					+ " configuration for subjectScope parameter in web.xml. Valid configurations are" + " \'"
+					+ EntitlementConstants.REQUEST_PARAM + "\', " + EntitlementConstants.REQUEST_ATTIBUTE + "\' and \'"
+					+ EntitlementConstants.SESSION + "\'");
+
+			throw new EntitlementFilterException(subjectScope + " is an invalid"
+					+ " configuration for subjectScope parameter in web.xml. Valid configurations are" + " \'"
+					+ EntitlementConstants.REQUEST_PARAM + "\', " + EntitlementConstants.REQUEST_ATTIBUTE + "\' and \'"
+					+ EntitlementConstants.SESSION + "\'");
+		}
+		if (attributes == null) {
+			log.error("Custom attributes not configured correctly: " + subjectScope);
+			throw new EntitlementFilterException("Custom attributes cannot be found " + subjectScope);
+		}
+		return attributes;
+	}
 
     private String findUserName(HttpServletRequest request, String subjectScope,
                                 String subjectAttributeName) throws EntitlementFilterException {
@@ -230,6 +290,15 @@ public class EntitlementFilter implements Filter {
             subject = (String) request.getAttribute(subjectAttributeName);
         } else if (subjectScope.equals(EntitlementConstants.BASIC_AUTH)) {
             EntitlementFilterCallBackHandler callBackHandler = new BasicAuthCallBackHandler(request);
+            subject = callBackHandler.getUserName();
+        } else if (subjectScope.equals(EntitlementConstants.SAML)) {
+        	//get the SAML session, etc.
+
+        	EntitlementFilterCallBackHandler callBackHandler = null;
+        	if (hasCustom)
+        		callBackHandler = new SAMLAuthCallBackHandler(request, attributeList);
+        	else
+        		callBackHandler = new SAMLAuthCallBackHandler(request);
             subject = callBackHandler.getUserName();
         } else {
             log.error(subjectScope + " is an invalid"
